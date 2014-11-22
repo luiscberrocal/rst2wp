@@ -4,6 +4,7 @@ import os
 import xml.etree.cElementTree
 from PIL import Image
 import mock
+from settings import test
 from lib import wordpresslib
 try:
     import unittest2 as unittest
@@ -151,11 +152,12 @@ class TestImage(unittest.TestCase):
         self.match_image(images[0], {'reference': 'http://foo-90/on/you', 'src': 'http://foo-rot90-scale0.25/on/you'})
 
 
-    @mock.patch('Image.open')
-    @mock.patch('urllib.urlretrieve')
+    @mock.patch('PIL.Image.open')
+    @mock.patch('urllib.request.urlretrieve')
     @mock.patch('os.mkdir')
     @mock.patch('os.path.exists')
     def test_rotate(self, os_path_exists, os_mkdir, urlretrieve, image_open):
+        print('RST2WP_ROOT', test.RST2WP_ROOT)
         text = """
 :title: Hello
 

@@ -1,7 +1,8 @@
 import os.path
 
 import urllib
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
+from urllib.request import urlretrieve
 from docutils.parsers.rst import Directive
 from config import POSTS_LOCATION, IMAGES_LOCATION, TEMP_DIRECTORY, TEMP_FILES
 from validity import raw_input
@@ -45,16 +46,16 @@ class DownloadDirective(Directive):
         filename = os.path.join(dir, target_filename)
         if not os.path.exists(filename):
             print("Downloading {0}".format(uri.encode('utf-8')))
-            filename, headers = urllib.urlretrieve(uri.encode('utf-8'), os.path.join(dir, target_filename))
+            filename, headers = urlretrieve(uri.encode('utf-8'), os.path.join(dir, target_filename))
 
         self.cleanup_file(filename)
         return filename
 
     def uri_filename(self, uri):
-        tuple = urlparse.urlparse(uri)
+        tuple = urlparse(uri)
         path = tuple.path
         target_filename = path.split('/')[-1]
         if '.' not in target_filename:
             target_filename = raw_input("Image specified by %s doesn't have a filename.\nWhat would you like this image to be named?\n> "%(uri,))
 
-        return urllib.unquote(target_filename)
+        return unquote(target_filename)
