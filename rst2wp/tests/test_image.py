@@ -4,6 +4,7 @@ import os
 import xml.etree.cElementTree
 from PIL import Image
 import mock
+from os.path import join
 from settings import test
 from lib import wordpresslib
 try:
@@ -12,7 +13,7 @@ except ImportError:
     import unittest  # and hope for the best
 
 from docutils import core
-
+from settings.test import FIXTURE_PATH
 #import nodes
 #import my_image
 import rst2wp
@@ -157,14 +158,16 @@ class TestImage(unittest.TestCase):
     @mock.patch('os.mkdir')
     @mock.patch('os.path.exists')
     def test_rotate(self, os_path_exists, os_mkdir, urlretrieve, image_open):
-        print('RST2WP_ROOT', test.RST2WP_ROOT)
+
         text = """
 :title: Hello
 
-.. image:: /tmp/foo.jpg
+.. image:: /tmp/pa.gif
    :rotate: 90"""
 
-        os_path_exists.side_effect = lambda filename: filename != '/home/ethan/some/directory/uploads/foo.jpg'
+        #os_path_exists.side_effect = lambda filename: filename != '/home/ethan/some/directory/uploads/foo.jpg'
+        uploaded_image = join(FIXTURE_PATH, 'pa.gif')
+        os_path_exists.side_effect = lambda filename: filename != uploaded_image
         urlretrieve.side_effect = lambda filename, target: (target, [])
 
         output = self.mock_run(text)
@@ -173,8 +176,8 @@ class TestImage(unittest.TestCase):
 
         #os_path_exists.assert_called_with('/home/ethan/some/directory/uploads')
         assert not os_mkdir.called
-        urlretrieve.assert_called_with('/tmp/foo.jpg', '/home/ethan/some/directory/uploads/foo.jpg')
-        image_open.assert_called_with('/home/ethan/some/directory/uploads/foo.jpg')
+        urlretrieve.assert_called_with('/tmp/pa.gif', uploaded_image)
+        image_open.assert_called_with(uploaded_image)
         image_open.return_value.rotate.assert_called_with(90)
         image_open.return_value.rotate.return_value.\
             save.assert_called_with('/home/ethan/some/directory/uploads/foo-rot90.jpg')
@@ -187,8 +190,9 @@ class TestImage(unittest.TestCase):
         self.assertEqual(len(images), 1)
         self.match_image(images[0], {'reference': None, 'src': 'http://wordpress/foo-rot90.jpg'})
 
-    @mock.patch('Image.open')
-    @mock.patch('urllib.urlretrieve')
+
+    @mock.patch('PIL.Image.open')
+    @mock.patch('urllib.request.urlretrieve')
     @mock.patch('os.mkdir')
     @mock.patch('os.path.exists')
     def test_rotate_and_scale(self, os_path_exists, os_mkdir, urlretrieve, image_open):
@@ -199,8 +203,8 @@ class TestImage(unittest.TestCase):
    :scale: 0.25
    :rotate: 90
 """
-
-        os_path_exists.side_effect = lambda filename: not filename.startswith('/home/ethan/some/directory/uploads/foo')
+        uploaded_image = join(FIXTURE_PATH, 'pa.gif')
+        os_path_exists.side_effect = lambda filename: not filename.startswith(FIXTURE_PATH)
         urlretrieve.side_effect = lambda filename, target: (target, [])
 
         images = [mock.Mock(), mock.Mock()]
@@ -215,9 +219,9 @@ class TestImage(unittest.TestCase):
 
         #os_path_exists.assert_called_with('/home/ethan/some/directory/uploads')
         assert not os_mkdir.called
-        urlretrieve.assert_called_with('/tmp/foo.jpg', '/home/ethan/some/directory/uploads/foo.jpg')
-        self.assertEqual(image_open.call_args_list, [(('/home/ethan/some/directory/uploads/foo.jpg',), {}),
-                                                     (('/home/ethan/some/directory/uploads/foo-rot90.jpg',), {})])
+        urlretrieve.assert_called_with('/tmp/foo.jpg', uploaded_image)
+        self.assertEqual(image_open.call_args_list, [((uploaded_image,), {}),
+                                                     ((join(FIXTURE_PATH, 'foo-rot90.jpg'),), {})])
         images[0].rotate.assert_called_with(90)
         images[0].rotate.return_value.\
             save.assert_called_with('/home/ethan/some/directory/uploads/foo-rot90.jpg')

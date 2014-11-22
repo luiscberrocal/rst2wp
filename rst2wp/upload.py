@@ -62,11 +62,13 @@ class UploadDirective(DownloadDirective):
         return utils.approximate_size(os.stat(filename).st_size)
 
     def guess_type(self, filename):
-        m = magic.open(magic.MAGIC_NONE)
-        m.load()
-        type = m.file(filename.encode('utf-8'))
-        m.close()
-        #print filename, type
+        # m = magic.open(magic.MAGIC_NONE)
+        # m.load()
+        # type = m.file(filename.encode('utf-8'))
+        # m.close()
+        # #print filename, type
+        # return type
+        type = magic.from_file(filename)
         return type
 
 directives.register_directive('upload', UploadDirective)
