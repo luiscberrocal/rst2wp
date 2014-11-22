@@ -8,7 +8,7 @@ from docutils.parsers.rst import roles, directives, languages
 
 import os.path
 
-import Image
+from PIL import Image
 from directive import DownloadDirective
 
 # Arguments starting with form-* are all OK.
@@ -170,7 +170,7 @@ class MyImageDirective(directives.images.Image, DownloadDirective):
                 factor = float(scale)
                 dimensions = image.size
                 dimensions = int(dimensions[0]*factor), int(dimensions[1]*factor)
-            except ValueError, e:
+            except ValueError as e:
                 dimensions = scale.split('x')
                 dimensions = int(dimensions[0]), int(dimensions[1])
 

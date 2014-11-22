@@ -2,9 +2,11 @@
 
 Encapsulates logic for whether to check existence of tags/categories,
 and how to check it based on a document.'''
-raw_input = __builtins__['raw_input']
+from lib import wordpresslib
 
-class Validity():
+raw_input = __builtins__['input']
+
+class Validity(object):
     @classmethod
     def should_check(cls, document):
         # Check if there is a wordpress_instance, and there is either
@@ -44,9 +46,9 @@ class Validity():
     @classmethod
     def check_existing_tag(cls, wp, tag):
         if ',' in tag:
-            raise ValueError, """Cannot use tags with ',' in the name.
+            raise ValueError("""Cannot use tags with ',' in the name.
 
-WordPress will break tags at commas. If you really want a tag with a comma, add it via the web interface."""
+WordPress will break tags at commas. If you really want a tag with a comma, add it via the web interface.""")
         if not wp.has_tag(tag):
             tag = cls.read_tag(tag)
 
@@ -66,18 +68,19 @@ WordPress will break tags at commas. If you really want a tag with a comma, add 
     def read_tag(cls, tag):
         fmt = {'tag': repr(str(tag))}
         if ',' in tag:
-            raise ValueError, """Cannot create tag with ',' in the name.
+            raise ValueError("""Cannot create tag with ',' in the name.
 
-If you really want a tag with a comma in the name, create it via the web interface first."""
+If you really want a tag with a comma in the name, create it via the web interface first.""")
 
-        print "Post has non-existent tag {tag}. Ctrl-C to cancel.".format(**fmt)
-        print "rst2wp can create the tag automatically, but can't set description or slug via XML-RPC API. If you want to edit these things, log in to the blog!"
+        print("Post has non-existent tag {tag}. Ctrl-C to cancel.".format(**fmt))
+        print("rst2wp can create the tag automatically, but can't set description or slug via XML-RPC API. "
+              "If you want to edit these things, log in to the blog!")
         raw_input("Confirm creation? [yes] ")
 
     @classmethod
     def read_category(cls, wp, cat):
         fmt = {'category': repr(str(cat))}
-        print "Post has non-existent category {category}. Ctrl-C to cancel.".format(**fmt)
+        print("Post has non-existent category {category}. Ctrl-C to cancel.".format(**fmt))
         raw_input("Confirm? [yes]")
 
         data = cls.read_base(cat)

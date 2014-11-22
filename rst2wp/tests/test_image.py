@@ -4,7 +4,7 @@ import os
 import xml.etree.cElementTree
 from PIL import Image
 import mock
-from rst2wp.lib import wordpresslib
+from lib import wordpresslib
 try:
     import unittest2 as unittest
 except ImportError:

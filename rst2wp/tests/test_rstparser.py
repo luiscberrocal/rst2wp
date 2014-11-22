@@ -1,6 +1,6 @@
 import mock
 
-from rst2wp.lib import wordpresslib
+from lib import wordpresslib
 
 try:
     import unittest2 as unittest

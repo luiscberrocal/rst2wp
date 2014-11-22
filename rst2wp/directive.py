@@ -1,9 +1,10 @@
 import os.path
 
 import urllib
-import urlparse
+from urllib.parse import urlparse
 from docutils.parsers.rst import Directive
 from config import POSTS_LOCATION, IMAGES_LOCATION, TEMP_DIRECTORY, TEMP_FILES
+from validity import raw_input
 
 
 class DownloadDirective(Directive):

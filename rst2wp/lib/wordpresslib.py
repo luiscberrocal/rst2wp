@@ -55,21 +55,22 @@ __date__ = "$Date: 2005/05/02 $"
 __copyright__ = "Copyright (c) 2005 Michele Ferretti"
 __license__ = "LGPL"
 
-import exceptions
+#import exceptions
 import re
 import os
-import xmlrpclib
+#import xmlrpclib
+from xmlrpc.client import Fault, ServerProxy, DateTime, Binary
 import datetime
 import time
 from functools import wraps
 import mimetypes
 import warnings
 
-class WordPressException(exceptions.Exception):
+class WordPressException(Exception):
     """Custom exception for WordPress client operations
     """
     def __init__(self, obj):
-        if isinstance(obj, xmlrpclib.Fault):
+        if isinstance(obj, Fault):
             self.id = obj.faultCode
             self.message = obj.faultString
         else:
@@ -243,7 +244,7 @@ def wordpress_call(func):
     def call(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except xmlrpclib.Fault, fault:
+        except Fault as fault:
             raise WordPressException(fault)
 
     return call
@@ -259,7 +260,7 @@ class WordPressClient():
         self.blogId = 0
         self.categories = None
         self.tags = None
-        self._server = xmlrpclib.ServerProxy(self.url)
+        self._server = ServerProxy(self.url)
 
     def _filterPost(self, post):
         """Transform post struct in WordPressPost instance
@@ -271,7 +272,7 @@ class WordPressClient():
         postObj.excerpt         = post['mt_excerpt']
         postObj.user            = post['userid']
         postObj.date            = time.strptime(str(post['date_created_gmt']), "%Y%m%dT%H:%M:%S")
-        print "Parsing date:", postObj.date, post['dateCreated']
+        print ("Parsing date:", postObj.date, post['dateCreated'])
         postObj.link            = post['link']
         postObj.textMore        = post['mt_text_more']
         postObj.allowComments   = post['mt_allow_comments'] == 1
@@ -412,8 +413,8 @@ class WordPressClient():
 
         if post.date:
             # Convert date to UTC
-            blogContent['date_created_gmt'] = xmlrpclib.DateTime(time.gmtime(time.mktime(post.date)))
-            print "Back-converting dateCreated:", post.date, blogContent['date_created_gmt']
+            blogContent['date_created_gmt'] = DateTime(time.gmtime(time.mktime(post.date)))
+            print("Back-converting dateCreated:", post.date, blogContent['date_created_gmt'])
 
         # Get remote method: e.g. self._server.metaWeblog.editPost
         ns = getattr(self._server, namespace)
@@ -426,7 +427,7 @@ class WordPressClient():
     def _marshal_categories_ids(self, categories):
         for c in categories:
             if c.id == -1:
-                raise TypeError, "bad mojo -- categories need IDs"
+                raise TypeError("bad mojo -- categories need IDs")
         return [{'categoryId': cat.id} for cat in categories]
 
     def _marshal_tags_names(self, tags):
@@ -611,13 +612,14 @@ class WordPressClient():
 
     @wordpress_call
     def __upload_file(self, mediaFileName, **fields):
-        f = file(mediaFileName, 'rb')
-        mediaBits = f.read()
-        f.close()
+        with open(mediaFileName, "rb") as f:
+            #f = file(mediaFileName, 'rb')
+            mediaBits = f.read()
+            #f.close()
 
         mediaStruct = {
             'name' : os.path.basename(mediaFileName),
-            'bits' : xmlrpclib.Binary(mediaBits)
+            'bits' : Binary(mediaBits)
         }
 
         mediaStruct.update(fields)

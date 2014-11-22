@@ -1,0 +1,5 @@
+Pillow==2.6.1
+docutils==0.12
+mock==1.0.1
+python-magic==0.4.6
+pyxdg==0.25
