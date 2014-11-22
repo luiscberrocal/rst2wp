@@ -420,7 +420,7 @@ class Rst2Wp(Application):
         if not self.preview:
             self.wp = wp = self.create_client(url, username, password)
 
-        if self.VERBOSE:
+        if self.VERBOSE and not self.preview:
             options = wp.get_options()
             print("Talking to %s version %s"%(options['software_name'], options['software_version']))
 
@@ -576,8 +576,8 @@ class Rst2Wp(Application):
                                          delete=False)
         fp.write(body.encode('utf8'))
         fp.close()
-        browser = os.getenv('BROWSER') or 'sensible-browser'
-        subprocess.call([browser, fp.name])
+        #browser = os.getenv('BROWSER') or '/usr/bin/open -a "/Applications/Google Chrome.app"'
+        subprocess.call(['/usr/bin/open','-a', '/Applications/Google Chrome.app', fp.name])
         # FIXME: better way to know when it gets loaded?
         time.sleep(5)
 
