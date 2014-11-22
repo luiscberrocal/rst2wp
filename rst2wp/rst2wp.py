@@ -152,7 +152,7 @@ class Application(object):
 
 
             print ('Need configuration! Edit %s'%(path,))
-            with open(path, 'wb') as fp:
+            with open(path, 'w') as fp:
                 config.write(fp)
             sys.exit()
 
@@ -492,7 +492,7 @@ class Rst2Wp(Application):
         body = utils.replace_newlines(body)
 
         new_post_data = {
-            'title' : fields['title'].decode('utf-8'), #unicode(fields['title']),
+            'title' : fields['title'], #.decode('utf-8'), #unicode(fields['title']),
             'categories': categories,
             'tags': tags,
             'description': body,
