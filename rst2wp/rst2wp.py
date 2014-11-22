@@ -501,7 +501,7 @@ class Rst2Wp(Application):
         if self.has_post_info(reader.document, 'id'):
             new_post = False
             post_id = self.get_post_info(reader.document, 'id')
-            post_id = post_id.decode('utf-8') #unicode(post_id)
+            post_id = post_id #.decode('utf-8') #unicode(post_id)
             post = wp.get_post(post_id)
         else:
             new_post = True
