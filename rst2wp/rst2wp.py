@@ -59,6 +59,10 @@ class MyTranslator(docutils.writers.html4css1.HTMLTranslator):
             # Hackishly insert the image title into the image tag
             self.body[-1] = image.replace('/>', 'title="%s" />'%self.attval(title))
 
+    def visit_literal_block(self, node):
+        docutils.writers.html4css1.HTMLTranslator.visit_literal_block(self, node)
+        pres_tag = self.body[-1]
+        self.body[-1] = pres_tag.replace('literal-block', '')
 
 class ValidityCheckerTransform(docutils.transforms.Transform):
     default_priority = 99
