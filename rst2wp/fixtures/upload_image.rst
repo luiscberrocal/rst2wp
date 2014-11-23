@@ -18,7 +18,7 @@ Changed date and title and category
 base.html
 ----------
 
-.. code-block:: HTML
+.. sourcecode:: html
 
 	{% load i18n %}
 	{% get_current_language as LANGUAGE_CODE %}
@@ -44,7 +44,9 @@ base.html
                </form>
            </li>
 	
-Add the folloging code :: python
+Add the folloging code
+
+.. sourcecode:: python
 
 	ugettext = lambda s: s
 
