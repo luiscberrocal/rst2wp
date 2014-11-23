@@ -61,8 +61,19 @@ class MyTranslator(docutils.writers.html4css1.HTMLTranslator):
 
     def visit_literal_block(self, node):
         docutils.writers.html4css1.HTMLTranslator.visit_literal_block(self, node)
-        pres_tag = self.body[-1]
-        self.body[-1] = pres_tag.replace('literal-block', '')
+        pre_tag = self.body[-1]
+        print(node.attributes.get('classes'))
+        print(pre_tag)
+        if 'code' in node.attributes.get('classes'):
+            self.body[-1] = ''
+
+    def depart_literal_block(self, node):
+        docutils.writers.html4css1.HTMLTranslator.depart_literal_block(self, node)
+        pre_tag = self.body[-1]
+        print(node.attributes.get('classes'))
+        print(pre_tag)
+        if 'code' in node.attributes.get('classes'):
+            self.body[-1] = ''
 
 class ValidityCheckerTransform(docutils.transforms.Transform):
     default_priority = 99
@@ -494,7 +505,7 @@ class Rst2Wp(Application):
         # WP will replace \n with <br/>, which isn't what RST is
         # designed for. We short-circuit this by replacing all newlines
         # with spaces, which ought to be safe.
-        body = utils.replace_newlines(body)
+        #body = utils.replace_newlines(body)
 
         new_post_data = {
             'title' : fields['title'], #.decode('utf-8'), #unicode(fields['title']),
