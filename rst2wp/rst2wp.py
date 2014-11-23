@@ -32,7 +32,7 @@ import my_image # registers MyImageDirective
 import upload   # registers UploadDirective
 import nodes    # monkeypatches nodes.field_list
 import validity
-from config import IMAGES_LOCATION, POSTS_LOCATION, TEMP_FILES
+from config import IMAGES_LOCATION, POSTS_LOCATION, TEMP_FILES, TEMP_DIRECTORY
 
 
 class UsageError(Exception):
@@ -58,6 +58,7 @@ class MyTranslator(docutils.writers.html4css1.HTMLTranslator):
         if title:
             # Hackishly insert the image title into the image tag
             self.body[-1] = image.replace('/>', 'title="%s" />'%self.attval(title))
+
 
 class ValidityCheckerTransform(docutils.transforms.Transform):
     default_priority = 99
@@ -571,6 +572,18 @@ class Rst2Wp(Application):
         #                    'used in ' + str(post_id), fields['title'])
 
     def run_preview(self, output):
+        body = output['body']
+        filename = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + '-output.html'
+        filename = os.path.join(TEMP_DIRECTORY, filename)
+
+        with open(filename, 'wb') as html_file:
+            html_file.write(body.encode('utf-8'))
+
+        #browser = os.getenv('BROWSER') or '/usr/bin/open -a "/Applications/Google Chrome.app"'
+        subprocess.call(['/usr/bin/open','-a', '/Applications/Google Chrome.app', html_file.name])
+
+
+    def run_preview2(self, output):
         body = output['body']
         fp = tempfile.NamedTemporaryFile(suffix='-rst2wp-preview.html',
                                          delete=False)

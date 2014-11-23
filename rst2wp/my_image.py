@@ -5,11 +5,18 @@ import subprocess
 import docutils.parsers.rst.directives.images
 from docutils import core, io, nodes, utils
 from docutils.parsers.rst import roles, directives, languages
+from docutils import nodes
+from docutils.parsers.rst import directives, Directive
+#
+from pygments import highlight
+from pygments.lexers import get_lexer_by_name
 
 import os.path
 
 from PIL import Image
+from pygments.lexers.special import TextLexer
 from directive import DownloadDirective
+from pygments.formatters.html import HtmlFormatter
 
 # Arguments starting with form-* are all OK.
 # Simple dictionary that accepts all those options.
@@ -194,4 +201,46 @@ class MyImageDirective(directives.images.Image, DownloadDirective):
         self.arguments[0] = self.current_uri = \
             self.document.settings.application.get_directive_info(self.document, 'image', self.uri, key)
 
+
+# Set to True if you want inline CSS styles instead of classes
+INLINESTYLES = False
+
+
+
+# The default formatter
+DEFAULT = HtmlFormatter(noclasses=INLINESTYLES)
+
+# Add name -> formatter pairs for every variant you want to use
+VARIANTS = {
+    # 'linenos': HtmlFormatter(noclasses=INLINESTYLES, linenos=True),
+}
+
+
+
+class Pygments(Directive):
+    """ Source code syntax hightlighting.
+    """
+    required_arguments = 1
+    optional_arguments = 0
+    final_argument_whitespace = True
+    option_spec = dict([(key, directives.flag) for key in VARIANTS])
+    has_content = True
+
+    def run(self):
+        self.assert_has_content()
+        try:
+            lexer = get_lexer_by_name(self.arguments[0])
+        except ValueError:
+            # no lexer found - use the text one instead of an exception
+            lexer = TextLexer()
+        # take an arbitrary option if more than one is given
+        formatter = self.options and VARIANTS[self.options.keys()[0]] or DEFAULT
+        #parsed = highlight(u'\n'.join(self.content), lexer, formatter)
+        #self.content.insert(0, '[code language="python"]')
+        #self.content.append('[/code]')
+        parsed = u'[code language="%s"]\n' % self.arguments[0] + u'\n'.join(self.content) + u'[/code]'
+        return [nodes.raw('', parsed, format='html')]
+
+
 directives.register_directive('image', MyImageDirective)
+directives.register_directive('sourcecode', Pygments)
