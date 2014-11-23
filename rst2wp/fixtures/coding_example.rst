@@ -1,8 +1,7 @@
-:title: b'Image Uploading'
+:title: b'Coding examples'
 :category: How to
 :tags: - Python
-:date: b'2014-11-23 08:53:34'
-:id: b'643'
+
 
 
 
@@ -11,9 +10,7 @@
 Install
 =========
 
-test uploading image my flag
-
-.. image:: file:///Users/luiscberrocal/PycharmProjects/rst2wp/rst2wp/fixtures/pa.gif
+Testing how code looks
 
 Changed date and title and category
 

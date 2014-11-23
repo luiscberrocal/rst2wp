@@ -8,6 +8,8 @@ from docutils.parsers.rst import roles, directives, languages
 from docutils import nodes
 from docutils.parsers.rst import directives, Directive
 #
+from docutils.parsers.rst.roles import set_classes
+from docutils.utils.code_analyzer import NumberLines, Lexer
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 
@@ -17,6 +19,14 @@ from PIL import Image
 from pygments.lexers.special import TextLexer
 from directive import DownloadDirective
 from pygments.formatters.html import HtmlFormatter
+# Customisation
+# -------------
+#
+# Do not insert inline nodes for the following tokens.
+# (You could add e.g. Token.Punctuation like ``['', 'p']``.) ::
+
+unstyled_tokens = [''] # Token.Text
+
 
 # Arguments starting with form-* are all OK.
 # Simple dictionary that accepts all those options.
@@ -219,6 +229,7 @@ VARIANTS = {
 
 class Pygments(Directive):
     """ Source code syntax hightlighting.
+    http://stefan.sofa-rockers.org/2010/01/13/django-highlighting-rest-using-pygments/
     """
     required_arguments = 1
     optional_arguments = 0
@@ -228,19 +239,71 @@ class Pygments(Directive):
 
     def run(self):
         self.assert_has_content()
-        try:
-            lexer = get_lexer_by_name(self.arguments[0])
-        except ValueError:
-            # no lexer found - use the text one instead of an exception
-            lexer = TextLexer()
-        # take an arbitrary option if more than one is given
-        formatter = self.options and VARIANTS[self.options.keys()[0]] or DEFAULT
-        #parsed = highlight(u'\n'.join(self.content), lexer, formatter)
-        #self.content.insert(0, '[code language="python"]')
-        #self.content.append('[/code]')
+        if self.arguments:
+            language = self.arguments[0]
+        else:
+            language = ''
+        #set_classes(self.options)
+        classes = ['code', language]
+        if 'classes' in self.options:
+            classes.extend(self.options['classes'])
         parsed = u'[code language="%s"]\n' % self.arguments[0] + u'\n'.join(self.content) + u'[/code]'
-        return [nodes.raw('', parsed, format='html')]
+        node = nodes.literal_block(parsed,classes=classes)
+        self.add_name(node)
+        #return [nodes.raw('', parsed, format='html')]
+        return [node]
 
+class CodeBlock(Directive):
+    """Parse and mark up content of a code block.
+    http://docutils.sourceforge.net/sandbox/code-block-directive/pygments_code_block_directive.py
+    """
+    optional_arguments = 1
+    option_spec = {'class': directives.class_option,
+                   'name': directives.unchanged,
+                   'number-lines': directives.unchanged # integer or None
+                  }
+    has_content = True
+
+    def run(self):
+        self.assert_has_content()
+        if self.arguments:
+            language = self.arguments[0]
+        else:
+            language = ''
+        set_classes(self.options)
+        classes = ['code', language]
+        if 'classes' in self.options:
+            classes.extend(self.options['classes'])
+
+        # TODO: config setting to skip lexical analysis:
+        ## if document.settings.no_highlight:
+        ##      language = ''
+
+        # set up lexical analyzer
+        tokens = Lexer(self.content, language)
+
+        if 'number-lines' in self.options:
+            # optional argument `startline`, defaults to 1
+            try:
+                startline = int(self.options['number-lines'] or 1)
+            except ValueError:
+                raise self.error(':number-lines: with non-integer start value')
+            endline = startline + len(self.content)
+            # add linenumber filter:
+            tokens = NumberLines(tokens, startline, endline)
+
+        node = nodes.literal_block('\n'.join(self.content), classes=classes)
+        self.add_name(node)
+
+        # analyze content and add nodes for every token
+        wordpress_language_tag = u'[code language=%s]\n' % language
+        node += nodes.Text(wordpress_language_tag, wordpress_language_tag)
+        for value in tokens.code:
+            # print (cls, value)
+            node += nodes.Text(value + '\n', value + '\n')
+        node += nodes.Text(u'[/code]', u'[/code]')
+
+        return [node]
 
 directives.register_directive('image', MyImageDirective)
-directives.register_directive('sourcecode', Pygments)
+directives.register_directive('sourcecode', CodeBlock)
