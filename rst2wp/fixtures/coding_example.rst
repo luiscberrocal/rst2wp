@@ -1,10 +1,6 @@
-:title: b'Coding examples'
+:title: 'Coding examples'
 :category: How to
 :tags: - Python
-
-
-
-
 
 
 Install

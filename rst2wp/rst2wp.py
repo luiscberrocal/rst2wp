@@ -121,8 +121,12 @@ class WordPressReader(standalone.Reader):
 
 
 class Application(object):
-    '''Container for all dotrc-config-related stuff'''
+    '''
+    Container for all dotrc-config-related stuff
+    '''
+
     config_name = 'rst2wp'
+
     def __init__(self):
         super(Application, self).__init__()
         self._config = None
@@ -184,14 +188,17 @@ class Application(object):
         '''Looks through all configs named configfile for (section, key)'''
         for dir in BaseDirectory.load_config_paths(self.config_name):
             filename = os.path.join(dir, configfile)
-            if not os.path.exists(filename): continue
+            if not os.path.exists(filename):
+                continue
 
             config = configparser.ConfigParser()
             with open(filename) as f:
                 config.read_file(f)
-            if not config.has_section(section): continue
+            if not config.has_section(section):
+                continue
 
-            if not config.has_option(section, key): continue
+            if not config.has_option(section, key):
+                continue
 
             return config.get(section, key)
 
@@ -199,6 +206,7 @@ class Application(object):
 
 
 class Rst2Wp(Application):
+
     def _known_link_stanza(self):
         known_links = configparser.ConfigParser()
         self._read_configs_into(known_links, 'known_links', 'known links')
@@ -216,6 +224,7 @@ class Rst2Wp(Application):
         self.list_tags = False
         self.list_categories = False
         self.publish = None
+        self.filename = None
 
     @property
     def data_storage(self):
@@ -508,7 +517,7 @@ class Rst2Wp(Application):
         #body = utils.replace_newlines(body)
 
         new_post_data = {
-            'title' : fields['title'], #.decode('utf-8'), #unicode(fields['title']),
+            'title': fields['title'], #.decode('utf-8'), #unicode(fields['title']),
             'categories': categories,
             'tags': tags,
             'description': body,
@@ -546,14 +555,14 @@ class Rst2Wp(Application):
         # 3. config publish_default
         # 4. default to false
         publish = None
-        if publish == None: publish = self.publish
-        if publish == None:
+        if publish is None: publish = self.publish
+        if publish is None:
             publish = fields.get('publish', None)
             if publish == 'yes': publish = True
             if publish == 'no': publish = False
-        if publish == None and config.has_option('config', 'publish_default'):
+        if publish is None and config.has_option('config', 'publish_default'):
             publish = config.getboolean('config', 'publish_default')
-        if publish == None: publish = False
+        if publish is None: publish = False
 
         if not new_post:
             post.__dict__.update(new_post_data)
