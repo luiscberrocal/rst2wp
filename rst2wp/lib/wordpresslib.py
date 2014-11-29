@@ -65,6 +65,10 @@ import time
 from functools import wraps
 import mimetypes
 import warnings
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class WordPressException(Exception):
     """Custom exception for WordPress client operations
@@ -272,7 +276,7 @@ class WordPressClient():
         postObj.excerpt         = post['mt_excerpt']
         postObj.user            = post['userid']
         postObj.date            = time.strptime(str(post['date_created_gmt']), "%Y%m%dT%H:%M:%S")
-        print ("Parsing date:", postObj.date, post['dateCreated'])
+        logger.debug("Parsing date: %s %s" % (postObj.date, post['dateCreated']))
         postObj.link            = post['link']
         postObj.textMore        = post['mt_text_more']
         postObj.allowComments   = post['mt_allow_comments'] == 1
@@ -414,7 +418,7 @@ class WordPressClient():
         if post.date:
             # Convert date to UTC
             blogContent['date_created_gmt'] = DateTime(time.gmtime(time.mktime(post.date)))
-            print("Back-converting dateCreated:", post.date, blogContent['date_created_gmt'])
+            logger.debug("Back-converting dateCreated: %s %s" % (post.date, blogContent['date_created_gmt']))
 
         # Get remote method: e.g. self._server.metaWeblog.editPost
         ns = getattr(self._server, namespace)

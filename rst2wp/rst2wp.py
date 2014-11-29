@@ -427,7 +427,7 @@ class Rst2Wp(Application):
         if not config.has_option('account', 'blog_id') or config.get('account', 'blog_id') == '':
             blogs = list(wp.get_users_blogs())
             blog = blogs[0]
-            print("Arbitrarily picking first blog: %s at %s"%(blog.name, blog.url))
+            logger.info("Arbitrarily picking first blog: %s at %s"%(blog.name, blog.url))
             wp.selectBlog(blog.id)
         else:
             blog_id = config.get_int('account', 'blog_id')

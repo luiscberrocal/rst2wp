@@ -1,8 +1,8 @@
-:title: 'Coding examples'
+:title: Coding examples
 :category: How to
 :tags: - Python
-:date: 2014-11-29 09:24:32
-:id: 696
+
+
 
 
 Install
@@ -11,6 +11,8 @@ Install
 Testing how code looks
 
 Changed date and title and category
+
+Update
 
 base.html
 ----------
