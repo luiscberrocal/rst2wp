@@ -373,7 +373,7 @@ class Rst2Wp(Application):
 
         Replaces an existing field of the same name.'''
         keystring = ':{key}:'.format(key=key)
-        new_line = '{keystring} {value}'.format(keystring=keystring, value=value.encode('utf8'))
+        new_line = '{keystring} {value}'.format(keystring=keystring, value=value)
 
         # Add field after other fields, or replace if exists
         in_fields = False
@@ -384,9 +384,11 @@ class Rst2Wp(Application):
             if not in_fields: continue
             if '' == lines[i].strip():
                 # Didn't have that field
+                logger.debug('Inserting key %s with %s' % (key, value))
                 lines.insert(i, new_line)
                 break
             if lines[i].startswith(keystring):
+                logger.debug('Replacing key %s with %s' % (key, value))
                 lines[i] = new_line
                 break
 
@@ -460,12 +462,12 @@ class Rst2Wp(Application):
             elif self.list_categories:
                 return self.run_list_categories()
 
-        with open(self.filename) as f:
+        with open(self.filename, 'r', encoding="utf-8") as f:
             self.text = text = f.read()
 
         # self.text is the version we eventually save;
         # text is the version we render
-        text = text+self._known_link_stanza()
+        text = text + self._known_link_stanza()
         reader = WordPressReader(self.preview)
 
         used_images = {}

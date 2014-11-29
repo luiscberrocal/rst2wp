@@ -1,6 +1,8 @@
 :title: 'Coding examples'
 :category: How to
 :tags: - Python
+:date: 2014-11-29 09:24:32
+:id: 696
 
 
 Install
