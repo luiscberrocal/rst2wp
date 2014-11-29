@@ -19,6 +19,11 @@ from PIL import Image
 from pygments.lexers.special import TextLexer
 from directive import DownloadDirective
 from pygments.formatters.html import HtmlFormatter
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 # Customisation
 # -------------
 #
@@ -296,6 +301,7 @@ class CodeBlock(Directive):
         self.add_name(node)
 
         # analyze content and add nodes for every token
+        logger.debug('Adding wordpress code tag for %s' % language)
         wordpress_language_tag = u'[code language=%s]\n' % language
         node += nodes.Text(wordpress_language_tag, wordpress_language_tag)
         for value in tokens.code:

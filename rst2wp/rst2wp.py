@@ -22,6 +22,7 @@ from docutils import core, io, nodes, utils
 from docutils.readers import standalone
 import docutils.writers.html4css1
 import docutils.transforms
+from settings.test import DEFAULT_WORDPRESS_URL
 #import yaml
 import utils
 
@@ -34,6 +35,12 @@ import nodes    # monkeypatches nodes.field_list
 import validity
 from config import IMAGES_LOCATION, POSTS_LOCATION, TEMP_FILES, TEMP_DIRECTORY
 
+import logging
+import logging.config
+from settings.production import LOGGING
+logging.config.dictConfig(LOGGING)
+
+logger = logging.getLogger(__name__)
 
 class UsageError(Exception):
     @classmethod
@@ -62,16 +69,14 @@ class MyTranslator(docutils.writers.html4css1.HTMLTranslator):
     def visit_literal_block(self, node):
         docutils.writers.html4css1.HTMLTranslator.visit_literal_block(self, node)
         pre_tag = self.body[-1]
-        print(node.attributes.get('classes'))
-        print(pre_tag)
         if 'code' in node.attributes.get('classes'):
             self.body[-1] = ''
 
     def depart_literal_block(self, node):
         docutils.writers.html4css1.HTMLTranslator.depart_literal_block(self, node)
         pre_tag = self.body[-1]
-        print(node.attributes.get('classes'))
-        print(pre_tag)
+        #print(node.attributes.get('classes'))
+        #print(pre_tag)
         if 'code' in node.attributes.get('classes'):
             self.body[-1] = ''
 
@@ -152,7 +157,7 @@ class Application(object):
 
         self._read_configs_into(config)
 
-        DEFAULT_WORDPRESS_URL = 'http://wordpress.example.com/wordpress/xmlrpc.php'
+
         path = os.path.join(BaseDirectory.save_config_path('rst2wp'), 'wordpressrc')
         if not config.has_section('account'):
             config.add_section('account')
@@ -602,7 +607,7 @@ class Rst2Wp(Application):
 
         with open(filename, 'wb') as html_file:
             html_file.write(body.encode('utf-8'))
-
+        logger.debug('Writing temp file to %s' % filename)
         #browser = os.getenv('BROWSER') or '/usr/bin/open -a "/Applications/Google Chrome.app"'
         subprocess.call(['/usr/bin/open','-a', '/Applications/Google Chrome.app', html_file.name])
 
@@ -632,6 +637,7 @@ class Rst2Wp(Application):
 
 def main():
     try:
+        logger.debug('__name__: %s' % __name__)
         Rst2Wp().run()
     except UsageError as u:
         print(u.error_message())
@@ -641,4 +647,5 @@ def main():
             os.unlink(filename)
 
 if __name__ == '__main__':
+
     main()
