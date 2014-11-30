@@ -1,6 +1,7 @@
 import mock
 
 from lib import wordpresslib
+from parsers.rstparser import RestructuredTextParser
 
 try:
     import unittest2 as unittest
@@ -8,6 +9,25 @@ except ImportError:
     import unittest  # and hope for the best
 
 from docutils import core
+
+class TestRestructuredTextParser(unittest.TestCase):
+
+    def test_parse_text(self):
+        text = """
+:title: Hello
+:foo: - test1
+      - test2
+      - test3
+:category: default_category
+:tags: - tag1
+       - tag2
+
+This is a test."""
+
+        rstparser= RestructuredTextParser()
+        body = rstparser.parse_text(text)
+        self.assertEqual(body, '<p>This is a test.</p>\n')
+        self.assertEqual(len(rstparser.bibliographic_fields),4)
 
 class TestNodes(unittest.TestCase):
     def test_field_loader(self):

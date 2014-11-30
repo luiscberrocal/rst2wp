@@ -119,7 +119,8 @@ class WordPressReader(standalone.Reader):
 
     def get_transforms(self):
         transforms = standalone.Reader.get_transforms(self)
-        if self.preview: return transforms
+        if self.preview:
+            return transforms
 
         transforms.insert(1, ValidityCheckerTransform)
         return transforms
